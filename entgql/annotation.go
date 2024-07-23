@@ -57,20 +57,18 @@ type (
 			Ops will initially be based on the field type. Then, if this has a value,
 			the predicates will be filtered to the allowed operations.
 
-			Default value is equivalent to OpsALL.
+			Nil is equivalent to all operations. EQ cannot be removed.
 
 			Examples:
 			1) Limit to only specific operations:
-			OpsEQ | OpsNEQ
-			2) Limit to all operations except one or more:
-			OpsALL &^ OpsContains &^ OpsContainsFold
+			gen.GT | gen.LT
 
 			Note, if the AllowedOps and field operations do not
-			overlap, then this will limit your generated predicates to none.
+			overlap, then this will limit your generated predicates to EQ.
 			e.g. AllowedOps = OpsHasPrefix, field type = int,
-			will produce no allowed predicates.
+			will only produce the equal predicate.
 		*/
-		AllowedOps Ops
+		AllowedOps *gen.Op
 	}
 
 	// Directive to apply on the field/type.
@@ -452,14 +450,11 @@ func Mutations(inputs ...MutationOption) Annotation {
 Returns an annotation that limits the predicate operations
 that will be generated for this field.
 
-Examples:
-1) Limit to only specific operations:
-WhereOps(OpsEQ | OpsNEQ)
-2) Limit to all operations except one or more:
-WhereOps(OpsALL &^ OpsContains &^ OpsContainsFold)
+Example:
+	WhereOps(gen.GT | gen.LT)
 */
-func WhereOps(ops Ops) Annotation {
-	return Annotation{AllowedOps: ops}
+func WhereOps(ops gen.Op) Annotation {
+	return Annotation{AllowedOps: &ops}
 }
 
 // Merge implements the schema.Merger interface.
@@ -518,7 +513,13 @@ func (a Annotation) Merge(other schema.Annotation) schema.Annotation {
 		a.QueryField.merge(ant.QueryField)
 	}
 
-	a.AllowedOps |= ant.AllowedOps
+	if ant.AllowedOps != nil {
+		if a.AllowedOps == nil {
+			a.AllowedOps = ant.AllowedOps
+		} else {
+			*a.AllowedOps |= *ant.AllowedOps
+		}
+	}
 
 	return a
 }

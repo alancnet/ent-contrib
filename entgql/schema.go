@@ -507,13 +507,10 @@ func (e *schemaGenerator) buildWhereInput(t *gen.Type, nodeGQLType, gqlType stri
 		}
 
 		ops := f.Ops()
-		allowed := OpsALL
-		if ant.AllowedOps > 0 {
-			allowed = ant.AllowedOps
-		}
+		allowed := ant.AllowedOps
 
 		for i, op := range ops {
-			if !allowed.hasGenOp(op) {
+			if op != gen.EQ && allowed != nil && *allowed&op == 0 {
 				continue
 			}
 
