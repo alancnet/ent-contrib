@@ -22,6 +22,27 @@ import (
 	"github.com/vektah/gqlparser/v2/ast"
 )
 
+type Op = gen.Op
+
+// List of all builtin predicates.
+const (
+	EQ           = gen.EQ           // =
+	NEQ          = gen.NEQ          // <>
+	GT           = gen.GT           // >
+	GTE          = gen.GTE          // >=
+	LT           = gen.LT           // <
+	LTE          = gen.LTE          // <=
+	IsNil        = gen.IsNil        // IS NULL / has
+	NotNil       = gen.NotNil       // IS NOT NULL / hasNot
+	In           = gen.In           // within
+	NotIn        = gen.NotIn        // without
+	EqualFold    = gen.EqualFold    // equals case-insensitive
+	Contains     = gen.Contains     // containing
+	ContainsFold = gen.ContainsFold // containing case-insensitive
+	HasPrefix    = gen.HasPrefix    // startingWith
+	HasSuffix    = gen.HasSuffix    // endingWith
+)
+
 type (
 	// Annotation annotates fields and edges with metadata for templates.
 	Annotation struct {
@@ -61,14 +82,14 @@ type (
 
 			Examples:
 			1) Limit to only specific operations:
-			gen.GT | gen.LT
+			entgql.GT | entgql.LT
 
 			Note, if the AllowedOps and field operations do not
 			overlap, then this will limit your generated predicates to EQ.
 			e.g. AllowedOps = OpsHasPrefix, field type = int,
 			will only produce the equal predicate.
 		*/
-		AllowedOps *gen.Op
+		AllowedOps *Op
 	}
 
 	// Directive to apply on the field/type.
@@ -451,9 +472,9 @@ Returns an annotation that limits the predicate operations
 that will be generated for this field.
 
 Example:
-	WhereOps(gen.GT | gen.LT)
+	WhereOps(entgql.GT | entgql.LT)
 */
-func WhereOps(ops gen.Op) Annotation {
+func WhereOps(ops Op) Annotation {
 	return Annotation{AllowedOps: &ops}
 }
 

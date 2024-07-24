@@ -16,7 +16,6 @@ package schema
 
 import (
 	"entgo.io/ent"
-	"entgo.io/ent/entc/gen"
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
@@ -36,7 +35,7 @@ func (User) Fields() []ent.Field {
 		field.String("name").
 			Default("Anonymous"),
 		field.UUID("username", uuid.UUID{}).
-			Annotations(entgql.WhereOps(gen.EQ | gen.In)).
+			Annotations(entgql.WhereOps(entgql.EQ | entgql.In)).
 			Default(uuid.New),
 		field.String("password").
 			Sensitive().
